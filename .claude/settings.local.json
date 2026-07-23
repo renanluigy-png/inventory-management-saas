@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx prisma *)",
+      "Bash(Get-ChildItem \"c:\\\\Users\\\\gring\\\\Documents\\\\Modelos de venda\\\\controle-estoque\\\\backend\\\\node_modules\\\\@types\\\\multer\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem \"c:\\\\Users\\\\gring\\\\Documents\\\\Modelos de venda\\\\controle-estoque\\\\backend\\\\node_modules\\\\multer\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Name -First 3)"
+    ]
+  }
+}

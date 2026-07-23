@@ -1,0 +1,933 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Role {
+  MASTER      // administrador da plataforma SaaS
+  ADMIN
+  GERENTE
+  FUNCIONARIO
+  CAIXA
+}
+
+enum PlanoTier {
+  FREE
+  STARTER
+  PROFESSIONAL
+  BUSINESS
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ATIVA
+  PENDENTE
+  SUSPENSA
+  CANCELADA
+  EXPIRADA
+}
+
+enum TipoPromocao {
+  PERCENTUAL
+  VALOR_FIXO
+  PRECO_ESPECIAL
+}
+
+enum StatusVenda {
+  ABERTA
+  FINALIZADA
+  CANCELADA
+}
+
+enum FormaPagamento {
+  DINHEIRO
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+  PIX
+  FIADO
+}
+
+enum StatusCaixa {
+  ABERTO
+  FECHADO
+}
+
+enum TipoMovimentacaoCaixa {
+  ENTRADA
+  SAIDA
+  SANGRIA
+  SUPRIMENTO
+}
+
+enum TipoMovimentacaoEstoque {
+  ENTRADA
+  SAIDA
+  AJUSTE
+  VENDA
+  DEVOLUCAO
+  BAIXA_PERDA
+  BAIXA_AVARIA
+  TRANSFERENCIA
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  PERMISSION_CHANGE
+  CAIXA_ABERTO
+  CAIXA_FECHADO
+  VENDA_FINALIZADA
+  VENDA_CANCELADA
+  BACKUP_CRIADO
+  RESTORE
+  PASSWORD_RESET
+  EXPORT
+  UPLOAD
+  PIX_GERADO
+  PIX_CONFIRMADO
+  FISCAL_EMITIDO
+  // SaaS — Etapa 14
+  EMPRESA_CRIADA
+  EMPRESA_SUSPENSA
+  EMPRESA_ATIVADA
+  EMPRESA_CANCELADA
+  PLANO_ALTERADO
+  ASSINATURA_CRIADA
+  ASSINATURA_RENOVADA
+  CONVITE_ENVIADO
+  CONVITE_ACEITO
+  USUARIO_REMOVIDO
+}
+
+enum PixStatus {
+  PENDENTE
+  PAGO
+  CANCELADO
+  EXPIRADO
+}
+
+enum StorageProvider {
+  LOCAL
+  S3
+  CLOUDINARY
+}
+
+enum TipoDocumentoFiscal {
+  NFCE
+  NFE
+  SAT
+  CUPOM
+}
+
+// ============================================================
+// PLATAFORMA SAAS — EMPRESAS E PLANOS
+// ============================================================
+
+model Company {
+  id               String     @id @default(uuid())
+  nome             String
+  nomeFantasia     String?
+  razaoSocial      String?
+  cnpj             String?    @unique
+  email            String?    @unique
+  telefone         String?
+  endereco         String?
+  cidade           String?
+  estado           String?
+  cep              String?
+  logoUrl          String?
+  ativo            Boolean    @default(true)
+  dominioCustom    String?    @unique
+  plano            PlanoTier  @default(FREE)
+  limiteUsuarios   Int        @default(3)
+  limiteProdutos   Int        @default(100)
+  vencimentoPlano  DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  usuarios     User[]
+  subscription Subscription?
+  settings     CompanySettings?
+  theme        CompanyTheme?
+  invites      CompanyInvite[]
+
+  @@index([ativo])
+  @@map("companies")
+}
+
+model Plan {
+  id              String    @id @default(uuid())
+  tier            PlanoTier @unique
+  nome            String
+  descricao       String?
+  precoMensal     Decimal   @db.Decimal(10, 2)
+  precoAnual      Decimal?  @db.Decimal(10, 2)
+  limiteUsuarios  Int
+  limiteProdutos  Int
+  limiteClientes  Int
+  limiteVendasMes Int
+  limiteStorageMb Int
+  modulos         String[]
+  ativo           Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                 String             @id @default(uuid())
+  companyId          String             @unique
+  planId             String
+  status             SubscriptionStatus @default(TRIAL)
+  trialEndsAt        DateTime?
+  currentPeriodStart DateTime           @default(now())
+  currentPeriodEnd   DateTime
+  canceledAt         DateTime?
+  suspendedAt        DateTime?
+  renovacaoAuto      Boolean            @default(true)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  plan    Plan    @relation(fields: [planId], references: [id])
+
+  @@index([status])
+  @@index([currentPeriodEnd])
+  @@map("subscriptions")
+}
+
+model CompanySettings {
+  id                      String   @id @default(uuid())
+  companyId               String   @unique
+  moeda                   String   @default("BRL")
+  idioma                  String   @default("pt")
+  fusoHorario             String   @default("America/Sao_Paulo")
+  tema                    String   @default("light")
+  impostoPercent          Decimal  @default(0) @db.Decimal(5, 2)
+  estoqueMinimoPadrao     Int      @default(5)
+  permitirVendaSemEstoque Boolean  @default(false)
+  configuracoesFiscais    Json?
+  configuracoesEstoque    Json?
+  configuracoesPDV        Json?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("company_settings")
+}
+
+model CompanyTheme {
+  id            String   @id @default(uuid())
+  companyId     String   @unique
+  corPrimaria   String   @default("#6366F1")
+  corSecundaria String   @default("#4F46E5")
+  corAcento     String   @default("#818CF8")
+  logoUrl       String?
+  faviconUrl    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("company_themes")
+}
+
+model CompanyInvite {
+  id           String    @id @default(uuid())
+  companyId    String
+  email        String
+  role         Role      @default(FUNCIONARIO)
+  tokenHash    String    @unique
+  expiresAt    DateTime
+  aceito       Boolean   @default(false)
+  aceitoAt     DateTime?
+  convidadoPor String?
+  createdAt    DateTime  @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, email])
+  @@index([tokenHash])
+  @@index([companyId])
+  @@map("company_invites")
+}
+
+// ============================================================
+// USUÁRIOS E PERMISSÕES
+// ============================================================
+
+model User {
+  id             String    @id @default(uuid())
+  nome           String
+  email          String    @unique
+  senha          String
+  role           Role      @default(FUNCIONARIO)
+  ativo          Boolean   @default(true)
+  companyId      String?   // null = usuário de plataforma (MASTER)
+  loginAttempts  Int       @default(0)
+  bloqueadoAte   DateTime?
+  ultimoLogin    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  company              Company?              @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  vendas               Sale[]
+  caixas               Caixa[]
+  movimentacoesEstoque MovimentacaoEstoque[]
+  auditLogs            AuditLog[]
+  refreshTokens        RefreshToken[]
+  passwordResets       PasswordResetToken[]
+  notificacoes         Notification[]
+  uploads              FileUpload[]
+  dashboardLayouts     DashboardLayout[]
+  eventos              Evento[]
+  favoritos            Favorito[]
+  aiChats              AIChat[]
+
+  @@index([email])
+  @@index([companyId])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  revogado  Boolean  @default(false)
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  usado     Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String?
+  companyId String?
+  titulo    String
+  mensagem  String
+  tipo      String   @default("info")
+  lida      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, lida])
+  @@index([companyId])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ============================================================
+// CATÁLOGO
+// ============================================================
+
+model Category {
+  id        String   @id @default(uuid())
+  nome      String   @unique
+  descricao String?
+  ativo     Boolean  @default(true)
+  companyId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  produtos Product[]
+
+  @@index([companyId])
+  @@map("categories")
+}
+
+model Product {
+  id            String   @id @default(uuid())
+  sku           String?  @unique
+  nome          String
+  descricao     String?
+  preco         Decimal  @db.Decimal(10, 2)
+  precoCusto    Decimal? @db.Decimal(10, 2)
+  estoque       Int      @default(0)
+  estoqueMinimo Int      @default(0)
+  codigoBarras  String?  @unique
+  unidade       String   @default("UN")
+  imagemUrl     String?
+  ativo         Boolean  @default(true)
+  companyId     String?
+  categoryId    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  category             Category?             @relation(fields: [categoryId], references: [id])
+  itensVenda           SaleItem[]
+  movimentacoesEstoque MovimentacaoEstoque[]
+  promocoes            PromocaoProduct[]
+
+  @@index([ativo, estoque])
+  @@index([categoryId])
+  @@index([codigoBarras])
+  @@index([companyId])
+  @@map("products")
+}
+
+// ============================================================
+// PROMOÇÕES
+// ============================================================
+
+model Promocao {
+  id         String       @id @default(uuid())
+  nome       String
+  descricao  String?
+  tipo       TipoPromocao
+  valor      Decimal      @db.Decimal(10, 2)
+  ativo      Boolean      @default(true)
+  companyId  String?
+  dataInicio DateTime
+  dataFim    DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  produtos PromocaoProduct[]
+
+  @@index([companyId])
+  @@map("promocoes")
+}
+
+model PromocaoProduct {
+  id         String   @id @default(uuid())
+  promocaoId String
+  productId  String
+  createdAt  DateTime @default(now())
+
+  promocao Promocao @relation(fields: [promocaoId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([promocaoId, productId])
+  @@map("promocao_products")
+}
+
+// ============================================================
+// CLIENTES
+// ============================================================
+
+model Customer {
+  id        String   @id @default(uuid())
+  nome      String
+  cpf       String?  @unique
+  email     String?  @unique
+  telefone  String?
+  endereco  String?
+  ativo     Boolean  @default(true)
+  companyId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vendas Sale[]
+
+  @@index([companyId])
+  @@map("customers")
+}
+
+// ============================================================
+// VENDAS
+// ============================================================
+
+model Sale {
+  id             String          @id @default(uuid())
+  numero         Int             @unique @default(autoincrement())
+  customerId     String?
+  userId         String
+  companyId      String?
+  total          Decimal         @db.Decimal(10, 2)
+  desconto       Decimal         @default(0) @db.Decimal(10, 2)
+  status         StatusVenda     @default(ABERTA)
+  formaPagamento FormaPagamento?
+  observacao     String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  customer          Customer?          @relation(fields: [customerId], references: [id])
+  user              User               @relation(fields: [userId], references: [id])
+  itens             SaleItem[]
+  movimentacaoCaixa CaixaMovimentacao?
+  pixPayments       PixPayment[]
+  documentosFiscais DocumentoFiscal[]
+
+  @@index([status, createdAt])
+  @@index([customerId])
+  @@index([userId])
+  @@index([companyId])
+  @@map("sales")
+}
+
+model SaleItem {
+  id         String  @id @default(uuid())
+  saleId     String
+  productId  String
+  quantidade Int
+  precoUnit  Decimal @db.Decimal(10, 2)
+  desconto   Decimal @default(0) @db.Decimal(10, 2)
+  subtotal   Decimal @db.Decimal(10, 2)
+
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("sale_items")
+}
+
+// ============================================================
+// CAIXA
+// ============================================================
+
+model Caixa {
+  id           String      @id @default(uuid())
+  userId       String
+  companyId    String?
+  abertura     DateTime    @default(now())
+  fechamento   DateTime?
+  saldoInicial Decimal     @db.Decimal(10, 2)
+  saldoFinal   Decimal?    @db.Decimal(10, 2)
+  status       StatusCaixa @default(ABERTO)
+  observacao   String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  user          User                @relation(fields: [userId], references: [id])
+  movimentacoes CaixaMovimentacao[]
+
+  @@index([companyId])
+  @@map("caixas")
+}
+
+model CaixaMovimentacao {
+  id        String                @id @default(uuid())
+  caixaId   String
+  saleId    String?               @unique
+  tipo      TipoMovimentacaoCaixa
+  valor     Decimal               @db.Decimal(10, 2)
+  descricao String?
+  createdAt DateTime              @default(now())
+
+  caixa Caixa @relation(fields: [caixaId], references: [id])
+  venda Sale?  @relation(fields: [saleId], references: [id])
+
+  @@map("caixa_movimentacoes")
+}
+
+// ============================================================
+// HISTÓRICO DE ESTOQUE
+// ============================================================
+
+model MovimentacaoEstoque {
+  id            String                  @id @default(uuid())
+  productId     String
+  userId        String
+  companyId     String?
+  tipo          TipoMovimentacaoEstoque
+  quantidade    Int
+  quantAnterior Int
+  quantNova     Int
+  motivo        String?
+  ip            String?
+  createdAt     DateTime                @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([companyId])
+  @@map("movimentacoes_estoque")
+}
+
+// ============================================================
+// AUDITORIA
+// ============================================================
+
+model AuditLog {
+  id          String      @id @default(uuid())
+  usuarioId   String?
+  companyId   String?
+  entidade    String
+  entidadeId  String?
+  acao        AuditAction
+  dadosAntes  Json?
+  dadosDepois Json?
+  ip          String?
+  userAgent   String?
+  dispositivo String?
+  dataHora    DateTime    @default(now())
+
+  usuario User? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+
+  @@index([usuarioId])
+  @@index([companyId])
+  @@index([entidade, entidadeId])
+  @@index([acao])
+  @@index([dataHora])
+  @@map("audit_logs")
+}
+
+// ============================================================
+// PAGAMENTOS PIX
+// ============================================================
+
+model PixPayment {
+  id             String    @id @default(uuid())
+  saleId         String?
+  companyId      String?
+  valor          Decimal   @db.Decimal(10, 2)
+  status         PixStatus @default(PENDENTE)
+  provider       String    @default("mock")
+  txid           String?   @unique
+  qrCode         String?
+  qrCodeBase64   String?
+  expiresAt      DateTime?
+  paidAt         DateTime?
+  webhookPayload Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  sale Sale? @relation(fields: [saleId], references: [id])
+
+  @@index([status])
+  @@index([saleId])
+  @@index([companyId])
+  @@map("pix_payments")
+}
+
+// ============================================================
+// DOCUMENTOS FISCAIS
+// ============================================================
+
+model DocumentoFiscal {
+  id          String              @id @default(uuid())
+  saleId      String?
+  companyId   String?
+  tipo        TipoDocumentoFiscal
+  numero      String?
+  serie       String?
+  chaveAcesso String?             @unique
+  status      String              @default("emitido")
+  provider    String              @default("mock")
+  xml         String?
+  pdf         String?
+  payload     Json?
+  resposta    Json?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  sale Sale? @relation(fields: [saleId], references: [id])
+
+  @@index([saleId])
+  @@index([companyId])
+  @@index([tipo])
+  @@map("documentos_fiscais")
+}
+
+// ============================================================
+// UPLOADS DE ARQUIVOS
+// ============================================================
+
+model FileUpload {
+  id           String   @id @default(uuid())
+  userId       String?
+  companyId    String?
+  entidade     String?
+  entidadeId   String?
+  campo        String?
+  filename     String
+  mimeType     String
+  tamanhoBytes Int
+  provider     String   @default("local")
+  url          String
+  path         String?
+  createdAt    DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entidade, entidadeId])
+  @@index([userId])
+  @@index([companyId])
+  @@map("file_uploads")
+}
+
+// ============================================================
+// ETAPA 15 — ENUMS NOVOS
+// ============================================================
+
+enum MetaTipo {
+  VENDAS_VALOR
+  VENDAS_QUANTIDADE
+  CLIENTES_NOVOS
+  TICKET_MEDIO
+  MARGEM_LUCRO
+}
+
+enum MetaPeriodo {
+  DIARIO
+  SEMANAL
+  MENSAL
+  TRIMESTRAL
+  ANUAL
+}
+
+enum EventoTipo {
+  COMPROMISSO
+  LEMBRETE
+  TAREFA
+  COBRANCA
+  VENCIMENTO
+  EVENTO_INTERNO
+}
+
+enum LogNivel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  CRITICAL
+}
+
+// ============================================================
+// ETAPA 15 — DASHBOARD PERSONALIZÁVEL
+// ============================================================
+
+model DashboardLayout {
+  id        String   @id @default(uuid())
+  userId    String
+  companyId String?
+  nome      String   @default("Default")
+  isDefault Boolean  @default(false)
+  widgets   Json     // [{id, type, x, y, w, h, visible, config}]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([companyId])
+  @@map("dashboard_layouts")
+}
+
+// ============================================================
+// ETAPA 15 — METAS
+// ============================================================
+
+model Meta {
+  id          String      @id @default(uuid())
+  companyId   String?
+  tipo        MetaTipo
+  nome        String
+  descricao   String?
+  valorAlvo   Decimal     @db.Decimal(14, 2)
+  periodo     MetaPeriodo
+  inicioEm    DateTime
+  fimEm       DateTime
+  ativa       Boolean     @default(true)
+  entidadeId  String?
+  entidadeTipo String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([companyId])
+  @@index([fimEm])
+  @@index([ativa])
+  @@map("metas")
+}
+
+// ============================================================
+// ETAPA 15 — AGENDA / CALENDÁRIO
+// ============================================================
+
+model Evento {
+  id            String     @id @default(uuid())
+  companyId     String?
+  userId        String
+  titulo        String
+  descricao     String?
+  tipo          EventoTipo @default(COMPROMISSO)
+  inicio        DateTime
+  fim           DateTime?
+  diaTodo       Boolean    @default(false)
+  concluido     Boolean    @default(false)
+  cor           String     @default("#6366F1")
+  entidadeId    String?
+  entidadeTipo  String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([inicio])
+  @@index([concluido])
+  @@map("eventos")
+}
+
+// ============================================================
+// ETAPA 15 — FAVORITOS
+// ============================================================
+
+model Favorito {
+  id         String   @id @default(uuid())
+  userId     String
+  companyId  String?
+  tipo       String
+  entidadeId String?
+  label      String
+  url        String?
+  dados      Json?
+  ordem      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tipo, entidadeId])
+  @@index([userId])
+  @@index([companyId])
+  @@map("favoritos")
+}
+
+// ============================================================
+// ETAPA 15 — HISTÓRICO DE ENTIDADES (diff)
+// ============================================================
+
+model EntityHistory {
+  id           String   @id @default(uuid())
+  companyId    String?
+  entidade     String
+  entidadeId   String
+  acao         String
+  usuarioId    String?
+  usuarioNome  String?
+  dadosAntes   Json?
+  dadosDepois  Json?
+  camposAlterados Json?
+  ip           String?
+  createdAt    DateTime @default(now())
+
+  @@index([entidade, entidadeId])
+  @@index([companyId])
+  @@index([createdAt])
+  @@map("entity_history")
+}
+
+// ============================================================
+// ETAPA 15 — LOGS TÉCNICOS
+// ============================================================
+
+model SystemLog {
+  id         String   @id @default(uuid())
+  companyId  String?
+  nivel      LogNivel @default(INFO)
+  categoria  String
+  mensagem   String
+  detalhes   Json?
+  usuarioId  String?
+  ip         String?
+  path       String?
+  metodo     String?
+  statusCode Int?
+  duracao    Int?
+  stackTrace String?
+  createdAt  DateTime @default(now())
+
+  @@index([nivel])
+  @@index([categoria])
+  @@index([companyId])
+  @@index([createdAt])
+  @@map("system_logs")
+}
+
+// ============================================================
+// ETAPA 16 — INTELIGÊNCIA ARTIFICIAL
+// ============================================================
+
+model AIChat {
+  id        String       @id @default(uuid())
+  userId    String
+  companyId String?
+  titulo    String       @default("Nova conversa")
+  arquivado Boolean      @default(false)
+  mensagens AIMensagem[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([companyId])
+  @@map("ai_chats")
+}
+
+model AIMensagem {
+  id        String   @id @default(uuid())
+  chatId    String
+  role      String
+  conteudo  String   @db.Text
+  favorita  Boolean  @default(false)
+  metadados Json?
+  createdAt DateTime @default(now())
+
+  chat AIChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, createdAt])
+  @@map("ai_mensagens")
+}
+
+// ============================================================
+// CONFIGURAÇÕES DO SISTEMA (legacy single-tenant)
+// ============================================================
+
+model SystemSettings {
+  id                      String   @id @default(uuid())
+  nomeEmpresa             String   @default("Minha Empresa")
+  cnpj                    String?
+  telefone                String?
+  email                   String?
+  endereco                String?
+  logoUrl                 String?
+  tema                    String   @default("light")
+  moeda                   String   @default("BRL")
+  impostoPercent          Decimal  @default(0) @db.Decimal(5, 2)
+  estoqueMinimoPadrao     Int      @default(5)
+  permitirVendaSemEstoque Boolean  @default(false)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@map("system_settings")
+}

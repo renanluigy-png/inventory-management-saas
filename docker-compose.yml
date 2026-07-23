@@ -1,0 +1,75 @@
+name: controle-estoque
+
+services:
+  # ── Banco de Dados PostgreSQL ────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB:       ${POSTGRES_DB:-controle_estoque}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-controle_estoque}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Backend (API Express) ────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-3333}:3333"
+    environment:
+      NODE_ENV:      production
+      PORT:          3333
+      DATABASE_URL:  postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-controle_estoque}?schema=public
+      JWT_SECRET:    ${JWT_SECRET:?JWT_SECRET é obrigatório}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-86400}
+      CORS_ORIGIN:   ${CORS_ORIGIN:-http://localhost}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app_network
+    volumes:
+      - uploads_data:/app/uploads
+      - logs_data:/app/logs
+
+  # ── Frontend (React + Nginx) ─────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3333}
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+# ── Volumes persistentes ─────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+    name: controle_estoque_postgres
+  uploads_data:
+    name: controle_estoque_uploads
+  logs_data:
+    name: controle_estoque_logs
+
+# ── Rede privada interna ─────────────────────────────────────────────────────
+networks:
+  app_network:
+    driver: bridge
+    name: controle_estoque_network

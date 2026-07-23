@@ -1,0 +1,39 @@
+# ── Dependências ────────────────────────────────────────────────────────────
+node_modules/
+
+# ── Variáveis de ambiente (NUNCA commitar) ───────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Build outputs ────────────────────────────────────────────────────────────
+dist/
+build/
+frontend/dist/
+backend/dist/
+mobile/dist/
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+backend/logs/
+
+# ── Backups do banco ──────────────────────────────────────────────────────────
+backend/backups/
+
+# ── Uploads (mantém estrutura de pastas via .gitkeep) ────────────────────────
+backend/uploads/*
+!backend/uploads/**/.gitkeep
+
+# ── Prisma gerado ────────────────────────────────────────────────────────────
+/generated/prisma
+
+# ── SO / IDEs ────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/
+
+# ── Cache ────────────────────────────────────────────────────────────────────
+.cache/
+.turbo/
+.eslintcache
