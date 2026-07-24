@@ -12,6 +12,12 @@ jest.mock('../../config/database', () => ({
       create: jest.fn(),
       update: jest.fn(),
     },
+    refreshToken: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+    },
     auditLog: {
       create: jest.fn(),
     },

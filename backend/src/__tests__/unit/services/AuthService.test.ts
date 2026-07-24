@@ -7,6 +7,12 @@ import jwt from 'jsonwebtoken';
 jest.mock('../../../repositories/UserRepository');
 jest.mock('bcryptjs', () => ({ compare: jest.fn(), hash: jest.fn() }));
 jest.mock('jsonwebtoken', () => ({ sign: jest.fn(), verify: jest.fn() }));
+jest.mock('../../../config/database', () => ({
+  prisma: {
+    user: { update: jest.fn() },
+    refreshToken: { create: jest.fn() },
+  },
+}));
 
 describe('AuthService', () => {
   let service: AuthService;
