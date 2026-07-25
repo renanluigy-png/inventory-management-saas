@@ -49,14 +49,9 @@ jobs:
         run: npm run lint
 
       - name: Rodar testes
+        # As variáveis de ambiente de teste são definidas em backend/jest.setup.ts
+        # (setupFiles do Jest), não aqui — assim `npm test` roda idêntico local e no CI.
         run: npm test
-        env:
-          NODE_ENV: test
-          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
-          JWT_SECRET: test-secret-for-ci-minimum-32-characters-long
-          JWT_EXPIRES_IN: 28800
-          PORT: 3334
-          CORS_ORIGIN: http://localhost:5173
 
       - name: Build de produção
         run: npm run build
