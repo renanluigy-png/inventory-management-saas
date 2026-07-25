@@ -21,10 +21,10 @@ const techs: Tech[] = [
   { icon: KeyRound, name: 'JWT', description: 'Autenticação stateless por token.' },
   { icon: RefreshCw, name: 'React Query', description: 'Cache e sincronização de dados assíncronos.' },
   { icon: Box, name: 'Zustand', description: 'Gerenciamento de estado global.' },
-  { icon: Palette, name: 'Tailwind CSS', description: 'Estilização utilitária e responsiva.' },
-  { icon: Smartphone, name: 'Expo', description: 'App mobile em React Native.' },
-  { icon: Workflow, name: 'GitHub Actions', description: 'Pipeline de CI: lint, testes e build.' },
   { icon: Container, name: 'Docker', description: 'Empacotamento e deploy consistente.' },
+  { icon: Workflow, name: 'GitHub Actions', description: 'Pipeline de CI: lint, testes e build.' },
+  { icon: Smartphone, name: 'Expo', description: 'App mobile em React Native.' },
+  { icon: Palette, name: 'Tailwind CSS', description: 'Estilização utilitária e responsiva.' },
 ]
 
 export function TechStackSection() {

@@ -4,6 +4,12 @@ import { Button } from '../../../components/ui/Button'
 import { useThemeStore } from '../../../store/theme.store'
 import { GITHUB_URL } from '../constants'
 
+const navLinks = [
+  { href: '#demo', label: 'Demo' },
+  { href: '#recursos', label: 'Recursos' },
+  { href: '#tecnologias', label: 'Tecnologias' },
+]
+
 export function LandingNavbar() {
   const navigate = useNavigate()
   const { theme, toggleTheme } = useThemeStore()
@@ -19,12 +25,15 @@ export function LandingNavbar() {
         </div>
 
         <div className="hidden items-center gap-8 md:flex">
-          <a href="#recursos" className="text-sm font-medium text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 transition-colors">
-            Recursos
-          </a>
-          <a href="#tecnologias" className="text-sm font-medium text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 transition-colors">
-            Tecnologias
-          </a>
+          {navLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="text-sm font-medium text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 transition-colors"
+            >
+              {link.label}
+            </a>
+          ))}
         </div>
 
         <div className="flex items-center gap-1.5">

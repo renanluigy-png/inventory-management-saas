@@ -12,23 +12,23 @@ interface Feature {
 }
 
 const features: Feature[] = [
-  { icon: Package, label: 'Gestão de Produtos' },
+  { icon: Package, label: 'Produtos' },
   { icon: Tag, label: 'Categorias' },
+  { icon: Boxes, label: 'Estoque' },
   { icon: Users, label: 'Clientes' },
   { icon: Truck, label: 'Fornecedores' },
   { icon: ShoppingCart, label: 'Vendas' },
-  { icon: Boxes, label: 'Estoque' },
   { icon: LayoutDashboard, label: 'Dashboard' },
   { icon: FileSearch, label: 'Auditoria' },
-  { icon: UserCog, label: 'Usuários' },
   { icon: Building2, label: 'Multiempresa' },
-  { icon: DatabaseBackup, label: 'Backup' },
+  { icon: UserCog, label: 'Usuários' },
   { icon: Webhook, label: 'API REST' },
   { icon: Smartphone, label: 'Mobile' },
-  { icon: Sparkles, label: 'Inteligência Artificial' },
-  { icon: QrCode, label: 'Integração PIX' },
+  { icon: Sparkles, label: 'IA' },
+  { icon: QrCode, label: 'PIX' },
   { icon: MessageCircle, label: 'WhatsApp' },
-  { icon: Lock, label: 'Segurança JWT' },
+  { icon: DatabaseBackup, label: 'Backup' },
+  { icon: Lock, label: 'JWT' },
   { icon: FileBarChart2, label: 'Relatórios' },
 ]
 

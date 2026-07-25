@@ -1,5 +1,18 @@
-import { Github, Linkedin, Package } from 'lucide-react'
-import { GITHUB_URL, LINKEDIN_URL } from '../constants'
+import { Github, Linkedin, Globe, Package } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { GITHUB_URL, LINKEDIN_URL, PORTFOLIO_URL } from '../constants'
+
+interface SocialLink {
+  icon: LucideIcon
+  url: string
+  label: string
+}
+
+const socialLinks: SocialLink[] = [
+  { icon: Github, url: GITHUB_URL, label: 'GitHub' },
+  { icon: Linkedin, url: LINKEDIN_URL, label: 'LinkedIn' },
+  { icon: Globe, url: PORTFOLIO_URL, label: 'Portfólio' },
+]
 
 export function LandingFooter() {
   const year = new Date().getFullYear()
@@ -19,28 +32,21 @@ export function LandingFooter() {
             <span>
               Desenvolvido por <strong className="font-semibold text-gray-700 dark:text-gray-200">Luigy Renan</strong>
             </span>
-            <a
-              href={GITHUB_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-lg p-2 transition-colors hover:bg-gray-100 hover:text-indigo-600 dark:hover:bg-gray-800 dark:hover:text-indigo-400"
-              title="GitHub"
-              aria-label="GitHub"
-            >
-              <Github className="h-4 w-4" />
-            </a>
-            {LINKEDIN_URL && (
-              <a
-                href={LINKEDIN_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg p-2 transition-colors hover:bg-gray-100 hover:text-indigo-600 dark:hover:bg-gray-800 dark:hover:text-indigo-400"
-                title="LinkedIn"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="h-4 w-4" />
-              </a>
-            )}
+            {socialLinks
+              .filter((link) => link.url)
+              .map((link) => (
+                <a
+                  key={link.label}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg p-2 transition-colors hover:bg-gray-100 hover:text-indigo-600 dark:hover:bg-gray-800 dark:hover:text-indigo-400"
+                  title={link.label}
+                  aria-label={link.label}
+                >
+                  <link.icon className="h-4 w-4" />
+                </a>
+              ))}
           </div>
         </div>
 

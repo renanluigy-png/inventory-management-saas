@@ -37,15 +37,17 @@ api.interceptors.response.use(
     const status: number = err.response?.status
     const msg: string = err.response?.data?.message || 'Erro ao comunicar com o servidor.'
 
+    const isAuthRoute =
+      (originalRequest?.url as string)?.includes('/auth/login') ||
+      (originalRequest?.url as string)?.includes('/auth/refresh')
+
+    // Rotas de autenticação tratam seu próprio feedback de erro (toast no
+    // formulário de login / login de demonstração) — o interceptor não deve duplicar.
+    if (isAuthRoute) {
+      return Promise.reject(err)
+    }
+
     if (status === 401) {
-      const isAuthRoute =
-        (originalRequest?.url as string)?.includes('/auth/login') ||
-        (originalRequest?.url as string)?.includes('/auth/refresh')
-
-      if (isAuthRoute) {
-        return Promise.reject(err)
-      }
-
       // Tenta renovar o access token com o refresh token
       const refreshToken = useAuthStore.getState().refreshToken
       if (refreshToken && !originalRequest._retry) {

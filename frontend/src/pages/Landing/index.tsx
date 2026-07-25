@@ -2,9 +2,11 @@ import { Navigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/auth.store'
 import { LandingNavbar } from './components/LandingNavbar'
 import { Hero } from './components/Hero'
+import { DemoSection } from './components/DemoSection'
 import { BenefitsSection } from './components/BenefitsSection'
 import { FeaturesSection } from './components/FeaturesSection'
 import { TechStackSection } from './components/TechStackSection'
+import { StatsSection } from './components/StatsSection'
 import { LandingFooter } from './components/LandingFooter'
 
 export default function Landing() {
@@ -17,9 +19,11 @@ export default function Landing() {
       <LandingNavbar />
       <main>
         <Hero />
+        <DemoSection />
         <BenefitsSection />
         <FeaturesSection />
         <TechStackSection />
+        <StatsSection />
       </main>
       <LandingFooter />
     </div>

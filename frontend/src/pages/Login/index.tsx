@@ -8,11 +8,9 @@ import { motion } from 'framer-motion'
 import { Eye, EyeOff, LogIn, UserRound, Wand2 } from 'lucide-react'
 import { login } from '../../api/auth'
 import { useAuthStore } from '../../store/auth.store'
+import { useDemoLogin, DEMO_EMAIL, DEMO_SENHA } from '../../hooks/useDemoLogin'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
-
-const DEMO_EMAIL = 'admin@demo.com'
-const DEMO_SENHA = '123456'
 
 const schema = z.object({
   email: z.string().email('Email inválido'),
@@ -24,7 +22,7 @@ export default function Login() {
   const navigate = useNavigate()
   const setAuth = useAuthStore((s) => s.setAuth)
   const [showPass, setShowPass] = useState(false)
-  const [guestLoading, setGuestLoading] = useState(false)
+  const { loading: guestLoading, enterDemo } = useDemoLogin()
 
   const {
     register,
@@ -36,31 +34,15 @@ export default function Login() {
     defaultValues: { email: '', senha: '' },
   })
 
-  async function authenticate(email: string, senha: string) {
-    const result = await login(email, senha)
-    setAuth(result.accessToken, result.user, result.refreshToken)
-    toast.success(`Bem-vindo, ${result.user.nome}!`)
-    navigate(result.user.role === 'MASTER' ? '/master' : '/dashboard')
-  }
-
   async function onSubmit(data: FormData) {
     try {
-      await authenticate(data.email, data.senha)
+      const result = await login(data.email, data.senha)
+      setAuth(result.accessToken, result.user, result.refreshToken)
+      toast.success(`Bem-vindo, ${result.user.nome}!`)
+      navigate(result.user.role === 'MASTER' ? '/master' : '/dashboard')
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? 'Credenciais inválidas'
       toast.error(msg)
-    }
-  }
-
-  async function handleGuestLogin() {
-    setGuestLoading(true)
-    try {
-      await authenticate(DEMO_EMAIL, DEMO_SENHA)
-    } catch (err: any) {
-      const msg = err?.response?.data?.message ?? 'Não foi possível entrar como visitante'
-      toast.error(msg)
-    } finally {
-      setGuestLoading(false)
     }
   }
 
@@ -137,7 +119,7 @@ export default function Login() {
           loading={guestLoading}
           disabled={isSubmitting}
           leftIcon={<UserRound className="h-4 w-4" />}
-          onClick={handleGuestLogin}
+          onClick={enterDemo}
         >
           Entrar como Visitante
         </Button>

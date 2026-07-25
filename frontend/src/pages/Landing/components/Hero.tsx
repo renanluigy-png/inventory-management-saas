@@ -1,15 +1,12 @@
-import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Github, Sparkles } from 'lucide-react'
-import { Button, buttonClasses } from '../../../components/ui/Button'
+import { Github, Package, Rocket } from 'lucide-react'
+import { buttonClasses } from '../../../components/ui/Button'
 import { Badge } from '../../../components/ui/Badge'
 import { GITHUB_URL } from '../constants'
 
 const trustBadges = ['TypeScript', 'Testes automatizados', 'CI/CD', 'Docker-ready']
 
 export function Hero() {
-  const navigate = useNavigate()
-
   return (
     <section className="relative overflow-hidden pt-32 pb-20 sm:pt-40 sm:pb-28">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-indigo-50 via-white to-white dark:from-indigo-950/40 dark:via-gray-900 dark:to-gray-900" />
@@ -22,8 +19,8 @@ export function Hero() {
           transition={{ duration: 0.4 }}
           className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 dark:border-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300"
         >
-          <Sparkles className="h-3.5 w-3.5" />
-          Projeto full stack de portfólio
+          <Package className="h-3.5 w-3.5" />
+          Controle Estoque
         </motion.div>
 
         <motion.h1
@@ -32,7 +29,7 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.05 }}
           className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-6xl"
         >
-          Controle Estoque
+          ERP SaaS para Gestão de Estoque e Empresas
         </motion.h1>
 
         <motion.p
@@ -41,16 +38,8 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.12 }}
           className="mx-auto mt-5 max-w-2xl text-lg text-gray-600 dark:text-gray-300"
         >
-          Plataforma completa para gestão de estoque, vendas e empresas.
-        </motion.p>
-
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.18 }}
-          className="mx-auto mt-2 max-w-xl text-sm text-gray-500 dark:text-gray-400"
-        >
-          ERP SaaS multiempresa com PDV, dashboard inteligente, relatórios e IA integrada.
+          Plataforma completa para controle de estoque, vendas, clientes, fornecedores, dashboard
+          inteligente, auditoria e gestão multiempresa.
         </motion.p>
 
         <motion.div
@@ -59,9 +48,10 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.25 }}
           className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
         >
-          <Button size="lg" rightIcon={<ArrowRight className="h-4 w-4" />} onClick={() => navigate('/login')}>
-            Começar agora
-          </Button>
+          <a href="#demo" className={buttonClasses('primary', 'lg')}>
+            <Rocket className="h-4 w-4" />
+            Testar Demonstração
+          </a>
           <a
             href={GITHUB_URL}
             target="_blank"
@@ -69,7 +59,7 @@ export function Hero() {
             className={buttonClasses('outline', 'lg')}
           >
             <Github className="h-4 w-4" />
-            Ver código no GitHub
+            Ver Código no GitHub
           </a>
         </motion.div>
 
