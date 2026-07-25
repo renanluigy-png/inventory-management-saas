@@ -2,8 +2,30 @@
 
 Sistema ERP completo de controle de estoque para comércio, composto por API REST, aplicação web e app mobile.
 
+## 🚀 Demonstração Online
+
+Experimente a aplicação completa diretamente pelo navegador ou execute o backend localmente para acessar a documentação da API.
+
+[![🌐 Testar Demo](https://img.shields.io/badge/%F0%9F%8C%90_Testar_Demo-4F46E5?style=for-the-badge)](https://renanluigy-png.github.io/inventory-management-saas/)
+[![💻 Código Fonte](https://img.shields.io/badge/%F0%9F%92%BB_C%C3%B3digo_Fonte-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/renanluigy-png/inventory-management-saas)
+[![📚 API Swagger](https://img.shields.io/badge/%F0%9F%93%9A_API_Swagger-85EA2D?style=for-the-badge)](http://localhost:3333/docs)
+
+> ⚠️ O botão **API Swagger** aponta para `http://localhost:3333/docs` e só funciona com o backend rodando localmente — veja [Desenvolvimento Local](#desenvolvimento-local).
+
+### Conta de Demonstração
+
+| Campo  | Valor             |
+|--------|-------------------|
+| E-mail | `admin@demo.com`  |
+| Senha  | `123456`          |
+
+Essas credenciais dão acesso de administrador a uma empresa de demonstração já populada, permitindo testar as principais funcionalidades do sistema — produtos, estoque, vendas, dashboard, relatórios e mais — sem precisar criar uma conta.
+
+---
+
 ## Sumário
 
+- [🚀 Demonstração Online](#-demonstração-online)
 - [Funcionalidades](#funcionalidades)
 - [Stack Tecnológico](#stack-tecnológico)
 - [Pré-requisitos](#pré-requisitos)
@@ -91,12 +113,11 @@ docker compose up -d
 
 **Credenciais padrão (seed):**
 
-| E-mail                  | Senha    | Perfil      |
-|-------------------------|----------|-------------|
-| admin@empresa.com       | senha123 | ADMIN       |
-| gerente@empresa.com     | senha123 | GERENTE     |
-| funcionario@empresa.com | senha123 | FUNCIONARIO |
-| caixa@empresa.com       | senha123 | CAIXA       |
+| E-mail            | Senha    | Perfil | Empresa           |
+|-------------------|----------|--------|--------------------|
+| `admin@demo.com`  | `123456` | ADMIN  | Loja Exemplo LTDA |
+
+> Mesma conta usada na [Demonstração Online](#-demonstração-online). Um usuário MASTER também é criado a partir de `MASTER_EMAIL`/`MASTER_SENHA` definidos no `.env` (veja [Variáveis de Ambiente](#variáveis-de-ambiente)).
 
 ---
 
