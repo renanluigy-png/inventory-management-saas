@@ -173,7 +173,7 @@ async function main() {
   // ----------------------------------------------------------------
   // Admin da empresa demo
   // ----------------------------------------------------------------
-  const adminHash = await bcrypt.hash('admin123', 10);
+  const adminHash = await bcrypt.hash('123456', 10);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@demo.com' },
     update: { companyId: demoCompany.id, senha: adminHash },
@@ -202,7 +202,7 @@ async function main() {
   console.log('\n Seed concluído!\n');
   console.log(' Credenciais:');
   console.log(`   ${env.MASTER_EMAIL}  [MASTER]  (senha: MASTER_SENHA do .env)`);
-  console.log('   admin@demo.com              / admin123     [ADMIN]  — Demo Store\n');
+  console.log('   admin@demo.com              / 123456       [ADMIN]  — Demo Store\n');
 }
 
 main()

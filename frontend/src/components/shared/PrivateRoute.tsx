@@ -15,7 +15,7 @@ export default function PrivateRoute({ roles }: PrivateRouteProps) {
 
   if (roles && user && !roles.includes(user.role)) {
     // MASTER gets their own panel; others go to dashboard
-    return <Navigate to={user.role === 'MASTER' ? '/master' : '/'} replace />
+    return <Navigate to={user.role === 'MASTER' ? '/master' : '/dashboard'} replace />
   }
 
   return <Outlet />

@@ -5,7 +5,7 @@ import { Package } from 'lucide-react'
 export default function AuthLayout() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
 
-  if (isAuthenticated) return <Navigate to="/" replace />
+  if (isAuthenticated) return <Navigate to="/dashboard" replace />
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-indigo-950 flex items-center justify-center p-4">

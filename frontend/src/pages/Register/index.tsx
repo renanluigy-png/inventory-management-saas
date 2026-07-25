@@ -62,7 +62,7 @@ export default function Register() {
       setAuth(result.accessToken, result.user, result.refreshToken)
       localStorage.setItem('onboarding_pending', '1')
       toast.success(`Empresa criada! Bem-vindo, ${result.user.nome}!`)
-      navigate('/')
+      navigate('/dashboard')
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? 'Erro ao criar empresa'
       toast.error(msg)

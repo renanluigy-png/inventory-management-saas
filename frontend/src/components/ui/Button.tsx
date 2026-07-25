@@ -26,19 +26,27 @@ const sizes = {
   icon: 'h-9 w-9 rounded-lg',
 }
 
+export function buttonClasses(
+  variant: NonNullable<ButtonProps['variant']> = 'primary',
+  size: NonNullable<ButtonProps['size']> = 'md',
+  className?: string
+) {
+  return cn(
+    'inline-flex items-center justify-center gap-2 font-medium transition-colors',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2',
+    'disabled:opacity-50 disabled:cursor-not-allowed',
+    variants[variant],
+    sizes[size],
+    className
+  )
+}
+
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', loading, disabled, children, leftIcon, rightIcon, ...props }, ref) => (
     <button
       ref={ref}
       disabled={disabled || loading}
-      className={cn(
-        'inline-flex items-center justify-center gap-2 font-medium transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
-        variants[variant],
-        sizes[size],
-        className
-      )}
+      className={buttonClasses(variant, size, className)}
       {...props}
     >
       {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : leftIcon}

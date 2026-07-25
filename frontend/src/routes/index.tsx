@@ -6,6 +6,7 @@ import MasterLayout from '../layouts/MasterLayout'
 import PrivateRoute from '../components/shared/PrivateRoute'
 import { Loading } from '../components/ui/Loading'
 
+const Landing        = lazy(() => import('../pages/Landing'))
 const Login          = lazy(() => import('../pages/Login'))
 const ForgotPassword = lazy(() => import('../pages/ForgotPassword'))
 const ResetPassword  = lazy(() => import('../pages/ResetPassword'))
@@ -39,6 +40,9 @@ export default function AppRoutes() {
   return (
     <Suspense fallback={<Loading fullscreen text="Carregando..." />}>
       <Routes>
+        {/* Landing pública */}
+        <Route path="/" element={<Landing />} />
+
         {/* Public */}
         <Route element={<AuthLayout />}>
           <Route path="/login"           element={<Login />} />
@@ -61,7 +65,7 @@ export default function AppRoutes() {
         {/* Protected — all authenticated users except MASTER */}
         <Route element={<PrivateRoute roles={['ADMIN', 'GERENTE', 'FUNCIONARIO', 'CAIXA']} />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/"           element={<Dashboard />} />
+            <Route path="/dashboard"  element={<Dashboard />} />
             <Route path="/sales"      element={<Sales />} />
             <Route path="/products"   element={<Products />} />
             <Route path="/categories" element={<Categories />} />

@@ -26,7 +26,7 @@ interface NavItem {
 }
 
 const mainNav: NavItem[] = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/', end: true },
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', end: true },
   { icon: ShoppingCart, label: 'PDV / Vendas', path: '/sales' },
   { icon: Package, label: 'Produtos', path: '/products' },
   { icon: Tag, label: 'Categorias', path: '/categories' },
