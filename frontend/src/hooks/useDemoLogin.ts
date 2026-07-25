@@ -18,25 +18,14 @@ export function useDemoLogin() {
 
   async function enterDemo() {
     setLoading(true)
-
-    const promise = (async () => {
+    try {
       const result = await login(DEMO_EMAIL, DEMO_SENHA)
       setAuth(result.accessToken, result.user, result.refreshToken)
       navigate(result.user.role === 'MASTER' ? '/master' : '/dashboard')
-      return result.user
-    })()
-
-    toast.promise(promise, {
-      loading: 'Entrando na demonstração...',
-      success: (user: { nome: string }) => `Bem-vindo, ${user.nome}!`,
-      error: (err: { response?: { data?: { message?: string } } }) =>
-        err?.response?.data?.message ?? 'Não foi possível entrar na demonstração',
-    })
-
-    try {
-      await promise
-    } catch {
-      // erro já exibido pelo toast.promise acima
+      toast.success('Bem-vindo à demonstração.')
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? 'Não foi possível entrar na demonstração.'
+      toast.error(msg)
     } finally {
       setLoading(false)
     }

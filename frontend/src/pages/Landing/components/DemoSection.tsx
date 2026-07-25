@@ -1,4 +1,4 @@
-import { LogIn, Mail, KeyRound } from 'lucide-react'
+import { LogIn } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { FadeIn } from '../../../components/ui/FadeIn'
 import { useDemoLogin, DEMO_EMAIL, DEMO_SENHA } from '../../../hooks/useDemoLogin'
@@ -9,24 +9,23 @@ export function DemoSection() {
   return (
     <section id="demo" className="mx-auto max-w-6xl px-4 py-20">
       <FadeIn>
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-8 text-center shadow-xl sm:p-14">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-8 text-center shadow-xl transition-transform duration-300 hover:scale-[1.01] sm:p-14">
           <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-20 -left-10 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
-          <h2 className="text-2xl font-bold text-white sm:text-3xl">🚀 Experimente Gratuitamente</h2>
+          <h2 className="text-2xl font-bold text-white sm:text-3xl">🚀 Teste a Demonstração</h2>
           <p className="mx-auto mt-3 max-w-lg text-indigo-100">
-            Você pode testar todas as funcionalidades sem criar uma conta.
+            Experimente gratuitamente todas as funcionalidades do sistema sem criar uma conta.
           </p>
 
-          <div className="mx-auto mt-8 flex max-w-md flex-col gap-3 rounded-2xl bg-white/10 p-5 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-center sm:gap-8">
-            <div className="flex items-center justify-center gap-2 text-sm text-white">
-              <Mail className="h-4 w-4 text-indigo-200" />
-              <span className="font-mono">{DEMO_EMAIL}</span>
+          <div className="mx-auto mt-8 grid max-w-md grid-cols-1 gap-5 rounded-2xl bg-white/10 p-6 shadow-inner backdrop-blur-sm sm:grid-cols-2 sm:gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-200">📧 Email</p>
+              <p className="mt-1 font-mono text-base text-white">{DEMO_EMAIL}</p>
             </div>
-            <div className="hidden h-4 w-px bg-white/30 sm:block" />
-            <div className="flex items-center justify-center gap-2 text-sm text-white">
-              <KeyRound className="h-4 w-4 text-indigo-200" />
-              <span className="font-mono">{DEMO_SENHA}</span>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-200">🔑 Senha</p>
+              <p className="mt-1 font-mono text-base text-white">{DEMO_SENHA}</p>
             </div>
           </div>
 
@@ -37,7 +36,7 @@ export function DemoSection() {
             leftIcon={<LogIn className="h-4 w-4" />}
             onClick={enterDemo}
           >
-            Entrar como Demonstração
+            {loading ? 'Entrando na demonstração...' : 'Entrar como Demonstração'}
           </Button>
         </div>
       </FadeIn>
