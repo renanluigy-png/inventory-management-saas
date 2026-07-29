@@ -2,8 +2,14 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
-export default defineConfig({
+export default defineConfig(() => ({
   plugins: [react()],
+
+  // GitHub Pages (site de projeto) serve em /<repositório>/, não na raiz do
+  // domínio — diferente do build Docker/nginx, que serve na raiz. Por isso o
+  // base path só muda quando VITE_BASE_PATH é definido explicitamente (feito
+  // pelo workflow de deploy do GitHub Pages), nunca por um .env committado.
+  base: process.env.VITE_BASE_PATH || '/',
 
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') },
@@ -42,4 +48,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

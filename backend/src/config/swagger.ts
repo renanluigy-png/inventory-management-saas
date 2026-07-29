@@ -1,4 +1,5 @@
 import swaggerJSDoc from 'swagger-jsdoc';
+import { env } from './env';
 
 const options: swaggerJSDoc.Options = {
   definition: {
@@ -12,8 +13,8 @@ const options: swaggerJSDoc.Options = {
       contact: { name: 'Suporte', email: 'suporte@empresa.com' },
     },
     servers: [
-      { url: 'http://localhost:3333', description: 'Desenvolvimento' },
-      { url: 'https://api.empresa.com', description: 'Produção' },
+      { url: 'https://inventory-management-saas-1.onrender.com', description: 'Produção (Render)' },
+      { url: `http://localhost:${env.PORT}`, description: 'Desenvolvimento local' },
     ],
     components: {
       securitySchemes: {

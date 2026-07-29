@@ -1,5 +1,6 @@
 import api from './client'
 import { useAuthStore } from '../store/auth.store'
+import { API_BASE_URL } from '../config/env'
 
 export interface AIMensagem {
   id: string
@@ -134,6 +135,5 @@ export const naturalSearch = async (query: string) => {
 // ── Export ──────────────────────────────────────────────────────────────────
 
 export const exportChat = (id: string): void => {
-  const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
-  window.open(`${BASE_URL}/api/v1/ai/chats/${id}/export`, '_blank')
+  window.open(`${API_BASE_URL}/api/v1/ai/chats/${id}/export`, '_blank')
 }

@@ -28,6 +28,12 @@ for (const dir of REQUIRED_DIRS) {
 const app = express();
 const systemController = new SystemController();
 
+// Render (e qualquer PaaS atrás de load balancer) envia X-Forwarded-For.
+// Sem isto, express-rate-limit não consegue identificar o IP real do
+// cliente e todos os usuários compartilham o mesmo bucket de limite.
+// "1" = confia em exatamente um hop de proxy (o do Render), não em qualquer um.
+app.set('trust proxy', 1);
+
 app.use(helmet());
 app.use(
   cors({

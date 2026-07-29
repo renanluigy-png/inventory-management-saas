@@ -1,11 +1,10 @@
 import axios from 'axios'
 import { toast } from 'sonner'
 import { useAuthStore } from '../store/auth.store'
-
-const BASE_URL = import.meta.env.VITE_API_URL ?? ''
+import { API_BASE_URL } from '../config/env'
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
   timeout: 30_000,
   headers: { 'Content-Type': 'application/json' },
 })
@@ -65,7 +64,7 @@ api.interceptors.response.use(
         isRefreshing = true
 
         try {
-          const response = await axios.post(`${BASE_URL}/api/v1/auth/refresh`, {
+          const response = await axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, {
             refreshToken,
           })
           const { accessToken, refreshToken: newRefresh } = response.data.data

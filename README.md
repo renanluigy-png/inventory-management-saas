@@ -2,15 +2,25 @@
 
 Sistema ERP completo de controle de estoque para comércio, composto por API REST, aplicação web e app mobile.
 
+[![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white)](https://nodejs.org)
+[![Express](https://img.shields.io/badge/Express-000000?style=flat&logo=express&logoColor=white)](https://expressjs.com)
+[![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat&logo=prisma&logoColor=white)](https://www.prisma.io)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![JWT](https://img.shields.io/badge/JWT-000000?style=flat&logo=jsonwebtokens&logoColor=white)](https://jwt.io)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com)
+[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=githubactions&logoColor=white)](https://github.com/features/actions)
+
 ## 🚀 Demonstração Online
 
-Experimente a aplicação completa diretamente pelo navegador ou execute o backend localmente para acessar a documentação da API.
-
 [![🌐 Testar Demo](https://img.shields.io/badge/%F0%9F%8C%90_Testar_Demo-4F46E5?style=for-the-badge)](https://renanluigy-png.github.io/inventory-management-saas/)
-[![💻 Código Fonte](https://img.shields.io/badge/%F0%9F%92%BB_C%C3%B3digo_Fonte-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/renanluigy-png/inventory-management-saas)
-[![📚 API Swagger](https://img.shields.io/badge/%F0%9F%93%9A_API_Swagger-85EA2D?style=for-the-badge)](http://localhost:3333/docs)
+[![📖 Swagger API](https://img.shields.io/badge/%F0%9F%93%96_Swagger_API-85EA2D?style=for-the-badge)](https://inventory-management-saas-1.onrender.com/docs)
+[![❤️ GitHub](https://img.shields.io/badge/%E2%9D%A4%EF%B8%8F_GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/renanluigy-png/inventory-management-saas)
 
-> ⚠️ O botão **API Swagger** aponta para `http://localhost:3333/docs` e só funciona com o backend rodando localmente — veja [Desenvolvimento Local](#desenvolvimento-local).
+Health check da API: [inventory-management-saas-1.onrender.com/health](https://inventory-management-saas-1.onrender.com/health)
+
+> ⚠️ O backend roda no plano gratuito do Render, que hiberna após períodos de inatividade — a primeira requisição pode levar até ~1 minuto para responder enquanto o serviço "acorda".
 
 ### Conta de Demonstração
 
@@ -23,9 +33,43 @@ Essas credenciais dão acesso de administrador a uma empresa de demonstração j
 
 ---
 
+## Arquitetura
+
+```mermaid
+flowchart TD
+    A["Frontend — React + Vite<br/>GitHub Pages"] -->|HTTPS / REST| B["Backend — Node.js + Express<br/>Render"]
+    B -->|Prisma ORM| C[("PostgreSQL<br/>Neon")]
+```
+
+---
+
+## Executando Localmente
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/renanluigy-png/inventory-management-saas.git
+   cd inventory-management-saas
+   ```
+2. Instale as dependências do backend e do frontend.
+3. Configure o arquivo `.env` de cada pacote a partir do respectivo `.env.example`.
+4. Execute o backend (`npm run dev` dentro de `backend/`).
+5. Com o backend em execução, a documentação Swagger fica disponível em:
+
+   ```
+   http://localhost:3333/docs
+   ```
+
+   > Esse endereço funciona **apenas localmente** — só é acessível na sua própria máquina enquanto o backend estiver rodando.
+
+O passo a passo completo, com backend, frontend e mobile, está em [Desenvolvimento Local](#desenvolvimento-local).
+
+---
+
 ## Sumário
 
 - [🚀 Demonstração Online](#-demonstração-online)
+- [Arquitetura](#arquitetura)
+- [Executando Localmente](#executando-localmente)
 - [Funcionalidades](#funcionalidades)
 - [Stack Tecnológico](#stack-tecnológico)
 - [Pré-requisitos](#pré-requisitos)

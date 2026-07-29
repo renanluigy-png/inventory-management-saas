@@ -22,5 +22,8 @@
     "docker:build": "docker compose build",
     "docker:logs": "docker compose logs -f",
     "docker:reset": "docker compose down -v && docker compose up -d --build"
+  },
+  "dependencies": {
+    "pg": "^8.22.0"
   }
 }

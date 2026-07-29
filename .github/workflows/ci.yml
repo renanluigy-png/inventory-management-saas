@@ -90,9 +90,10 @@ jobs:
         run: npm test
 
       - name: Build de produção
+        # VITE_API_URL/VITE_WS_URL vêm de frontend/.env.production (modo
+        # "production" é o padrão do `vite build`) — não precisam ser
+        # redefinidos aqui.
         run: npm run build
-        env:
-          VITE_API_URL: http://localhost:3333
 
   # ── Docker Build Validation ───────────────────────────────────────────────────
   docker:
@@ -118,11 +119,13 @@ jobs:
           cache-to: type=gha,mode=max,scope=backend
 
       - name: Build imagem frontend
+        # Sem build-args: usa o default do ARG VITE_API_URL no Dockerfile
+        # (http://localhost:3333 — correto para o deploy via docker-compose,
+        # onde o navegador acessa o backend pela porta publicada no host).
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
           push: false
           tags: controle-estoque-frontend:ci
-          build-args: VITE_API_URL=http://localhost:3333
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend

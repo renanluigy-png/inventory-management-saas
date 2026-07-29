@@ -1,8 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../store/auth.store';
-
-const WS_URL = import.meta.env.VITE_WS_URL ?? import.meta.env.VITE_API_URL?.replace('/api/v1', '') ?? 'http://localhost:3000';
+import { WS_BASE_URL } from '../config/env';
 
 let socket: Socket | null = null;
 
@@ -14,7 +13,7 @@ export function useWebSocket() {
     if (!token) return;
 
     if (!socket || !socket.connected) {
-      socket = io(WS_URL, {
+      socket = io(WS_BASE_URL, {
         path: '/ws',
         auth: { token },
         transports: ['websocket'],
