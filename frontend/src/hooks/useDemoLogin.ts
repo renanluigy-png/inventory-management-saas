@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { login } from '../api/auth'
+import api from '../api/client'
 import { useAuthStore } from '../store/auth.store'
 
 export const DEMO_EMAIL = 'admin@demo.com'
@@ -19,6 +20,10 @@ export function useDemoLogin() {
   async function enterDemo() {
     setLoading(true)
     try {
+      // Acorda a API do Render antes do login para que a primeira tentativa
+      // não falhe quando o serviço estava hibernando.
+      await api.get('/health', { timeout: 90_000 })
+
       const result = await login(DEMO_EMAIL, DEMO_SENHA)
       setAuth(result.accessToken, result.user, result.refreshToken)
       navigate(result.user.role === 'MASTER' ? '/master' : '/dashboard')
