@@ -28,6 +28,16 @@ for (const dir of REQUIRED_DIRS) {
 const app = express();
 const systemController = new SystemController();
 
+// Origens permitidas para o frontend. CORS_ORIGIN pode conter múltiplas
+// origens separadas por vírgula; a origem oficial do GitHub Pages também é
+// permitida explicitamente para a demonstração pública.
+const allowedOrigins = new Set(
+  [
+    ...env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean),
+    'https://renanluigy-png.github.io',
+  ]
+);
+
 // Render (e qualquer PaaS atrás de load balancer) envia X-Forwarded-For.
 // Sem isto, express-rate-limit não consegue identificar o IP real do
 // cliente e todos os usuários compartilham o mesmo bucket de limite.
@@ -37,7 +47,15 @@ app.set('trust proxy', 1);
 app.use(helmet());
 app.use(
   cors({
-    origin: env.CORS_ORIGIN,
+    origin: (origin, callback) => {
+      // Requisições sem Origin (health checks, ferramentas e chamadas server-to-server)
+      // continuam permitidas.
+      if (!origin || allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error('Origem não permitida pelo CORS.'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
