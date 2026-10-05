@@ -21,7 +21,11 @@ export interface RegisterCompanyData {
 
 export const authApi = {
   login: async (data: LoginCredentials) => {
-    const res = await api.post<ApiResponse<LoginResponse>>('/api/v1/auth/login', data)
+    // O backend está hospedado no plano gratuito do Render e pode levar até ~1 minuto
+    // para acordar após um período de inatividade. O login precisa tolerar esse cold start.
+    const res = await api.post<ApiResponse<LoginResponse>>('/api/v1/auth/login', data, {
+      timeout: 90_000,
+    })
     return res.data.data
   },
 
