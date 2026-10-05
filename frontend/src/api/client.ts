@@ -77,7 +77,7 @@ api.interceptors.response.use(
           processQueue(refreshError, null)
           useAuthStore.getState().logout()
           toast.error('Sessão expirada. Faça login novamente.')
-          window.location.href = '/login'
+          window.location.assign(`${import.meta.env.BASE_URL}login`)
           return Promise.reject(refreshError)
         } finally {
           isRefreshing = false
@@ -87,7 +87,7 @@ api.interceptors.response.use(
       // Sem refresh token — logout direto
       useAuthStore.getState().logout()
       toast.error('Sessão expirada. Faça login novamente.')
-      window.location.href = '/login'
+      window.location.assign(`${import.meta.env.BASE_URL}login`)
     } else if (status === 403) {
       toast.error('Acesso não permitido.')
     } else if (status === 429) {
