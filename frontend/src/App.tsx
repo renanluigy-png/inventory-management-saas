@@ -16,6 +16,8 @@ const queryClient = new QueryClient({
   },
 })
 
+const basename = import.meta.env.BASE_URL.replace(/\/$/, '')
+
 export default function App() {
   const [splashDone, setSplashDone] = useState(false)
   const handleSplashDone = useCallback(() => setSplashDone(true), [])
@@ -23,7 +25,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
+        <BrowserRouter basename={basename}>
           {!splashDone && <SplashScreen onDone={handleSplashDone} />}
           <AppRoutes />
           <Toaster
