@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, type ComponentType, type LazyExoticComponent } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import AuthLayout from '../layouts/AuthLayout'
 import DashboardLayout from '../layouts/DashboardLayout'
@@ -6,35 +6,74 @@ import MasterLayout from '../layouts/MasterLayout'
 import PrivateRoute from '../components/shared/PrivateRoute'
 import { Loading } from '../components/ui/Loading'
 
-const Landing        = lazy(() => import('../pages/Landing'))
-const Login          = lazy(() => import('../pages/Login'))
-const ForgotPassword = lazy(() => import('../pages/ForgotPassword'))
-const ResetPassword  = lazy(() => import('../pages/ResetPassword'))
-const Dashboard      = lazy(() => import('../pages/Dashboard'))
-const Products       = lazy(() => import('../pages/Products'))
-const Categories     = lazy(() => import('../pages/Categories'))
-const Customers      = lazy(() => import('../pages/Customers'))
-const Sales          = lazy(() => import('../pages/Sales'))
-const Stock          = lazy(() => import('../pages/Stock'))
-const Reports        = lazy(() => import('../pages/Reports'))
-const Settings       = lazy(() => import('../pages/Settings'))
-const Audit          = lazy(() => import('../pages/Audit'))
-const Users          = lazy(() => import('../pages/Users'))
-const Promotions     = lazy(() => import('../pages/Promotions'))
-const Metas          = lazy(() => import('../pages/Metas'))
-const Agenda         = lazy(() => import('../pages/Agenda'))
-const Favoritos      = lazy(() => import('../pages/Favoritos'))
-const Monitor        = lazy(() => import('../pages/Monitor'))
-const TechLogs       = lazy(() => import('../pages/TechLogs'))
-const AIPage         = lazy(() => import('../pages/AI'))
-const NotFound       = lazy(() => import('../pages/NotFound'))
+const CHUNK_RELOAD_KEY = 'cde-lazy-chunk-reload-at'
+
+function lazyWithRetry<T extends ComponentType<any>>(
+  importer: () => Promise<{ default: T }>
+): LazyExoticComponent<T> {
+  return lazy(async () => {
+    try {
+      const module = await importer()
+
+      try {
+        sessionStorage.removeItem(CHUNK_RELOAD_KEY)
+      } catch {
+        // noop
+      }
+
+      return module
+    } catch (error) {
+      // Publicações de SPA em GitHub Pages podem deixar o navegador com HTML
+      // antigo apontando para um chunk hash que acabou de ser substituído.
+      // Uma única navegação para a raiz com query nova força o HTML atualizado.
+      try {
+        const attemptedAt = Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) ?? '0')
+        const recentlyRetried = Date.now() - attemptedAt < 30_000
+
+        if (!recentlyRetried) {
+          sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()))
+          const baseUrl = import.meta.env.BASE_URL
+          const separator = baseUrl.includes('?') ? '&' : '?'
+          window.location.replace(baseUrl + separator + 'chunkReload=' + Date.now())
+        }
+      } catch {
+        // sessionStorage pode estar indisponível em alguns modos do navegador.
+      }
+
+      throw error
+    }
+  })
+}
+
+const Landing        = lazyWithRetry(() => import('../pages/Landing'))
+const Login          = lazyWithRetry(() => import('../pages/Login'))
+const ForgotPassword = lazyWithRetry(() => import('../pages/ForgotPassword'))
+const ResetPassword  = lazyWithRetry(() => import('../pages/ResetPassword'))
+const Dashboard      = lazyWithRetry(() => import('../pages/Dashboard'))
+const Products       = lazyWithRetry(() => import('../pages/Products'))
+const Categories     = lazyWithRetry(() => import('../pages/Categories'))
+const Customers      = lazyWithRetry(() => import('../pages/Customers'))
+const Sales          = lazyWithRetry(() => import('../pages/Sales'))
+const Stock          = lazyWithRetry(() => import('../pages/Stock'))
+const Reports        = lazyWithRetry(() => import('../pages/Reports'))
+const Settings       = lazyWithRetry(() => import('../pages/Settings'))
+const Audit          = lazyWithRetry(() => import('../pages/Audit'))
+const Users          = lazyWithRetry(() => import('../pages/Users'))
+const Promotions     = lazyWithRetry(() => import('../pages/Promotions'))
+const Metas          = lazyWithRetry(() => import('../pages/Metas'))
+const Agenda         = lazyWithRetry(() => import('../pages/Agenda'))
+const Favoritos      = lazyWithRetry(() => import('../pages/Favoritos'))
+const Monitor        = lazyWithRetry(() => import('../pages/Monitor'))
+const TechLogs       = lazyWithRetry(() => import('../pages/TechLogs'))
+const AIPage         = lazyWithRetry(() => import('../pages/AI'))
+const NotFound       = lazyWithRetry(() => import('../pages/NotFound'))
 
 // Master Panel
-const MasterDashboard  = lazy(() => import('../pages/Master/Dashboard'))
-const MasterCompanies  = lazy(() => import('../pages/Master/Companies'))
-const MasterAudit      = lazy(() => import('../pages/Master/Audit'))
-const MasterUsers      = lazy(() => import('../pages/Master/Users'))
-const MasterMonitor    = lazy(() => import('../pages/Master/Monitor'))
+const MasterDashboard  = lazyWithRetry(() => import('../pages/Master/Dashboard'))
+const MasterCompanies  = lazyWithRetry(() => import('../pages/Master/Companies'))
+const MasterAudit      = lazyWithRetry(() => import('../pages/Master/Audit'))
+const MasterUsers      = lazyWithRetry(() => import('../pages/Master/Users'))
+const MasterMonitor    = lazyWithRetry(() => import('../pages/Master/Monitor'))
 
 export default function AppRoutes() {
   return (
