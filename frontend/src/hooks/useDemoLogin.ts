@@ -19,9 +19,19 @@ export function useDemoLogin() {
   async function enterDemo() {
     setLoading(true)
     try {
-      // O próprio login acorda o serviço do Render quando ele está hibernando.
-      // Não fazemos uma chamada prévia a /health porque esse endpoint depende
-      // do banco e pode retornar 503 durante o cold start.
+      // A primeira chamada acorda o serviço do Render. O health pode retornar
+      // 503 enquanto o banco termina de conectar, então sua resposta não decide
+      // o fluxo: o login vem logo em seguida.
+      try {
+        await fetch(import.meta.env.VITE_API_URL + '/health', {
+          method: 'GET',
+          cache: 'no-store',
+          signal: AbortSignal.timeout(90_000),
+        })
+      } catch {
+        // Timeout/503/CORS no health não impedem a tentativa de autenticação.
+      }
+
       let result
       try {
         result = await login(DEMO_EMAIL, DEMO_SENHA)
