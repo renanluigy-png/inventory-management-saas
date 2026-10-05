@@ -3,27 +3,40 @@ import app from './app';
 import { env } from './config/env';
 import { logger } from './utils/logger';
 import { initSocketIO } from './websocket/socket';
+import { ensureDemoAccount } from './services/DemoAccountService';
 
 const httpServer = createServer(app);
 initSocketIO(httpServer);
 
-httpServer.listen(env.PORT, () => {
-  logger.info(`Servidor iniciado na porta ${env.PORT} [${env.NODE_ENV}]`);
+async function startServer() {
+  // A conta demo faz parte do contrato do ambiente público. O bootstrap é
+  // idempotente e nunca remove dados existentes.
+  await ensureDemoAccount();
+  logger.info('Conta de demonstração verificada com sucesso.');
 
-  // Render expõe a URL pública do serviço em RENDER_EXTERNAL_URL — usamos
-  // isso no banner para não exibir "localhost" em produção.
-  const publicUrl = process.env.RENDER_EXTERNAL_URL ?? `http://localhost:${env.PORT}`;
-  const wsUrl = publicUrl.replace(/^http/, 'ws');
+  httpServer.listen(env.PORT, () => {
+    logger.info(`Servidor iniciado na porta ${env.PORT} [${env.NODE_ENV}]`);
 
-  console.log('\n╔════════════════════════════════════════════╗');
-  console.log('║   ERP SaaS — Enterprise Premium (E15)     ║');
-  console.log('╚════════════════════════════════════════════╝');
-  console.log(`\n  Servidor: ${publicUrl}`);
-  console.log(`  Ambiente: ${env.NODE_ENV}`);
-  console.log(`  Health:   ${publicUrl}/health`);
-  console.log(`  API:      ${publicUrl}/api/v1`);
-  console.log(`  WebSocket: ${wsUrl}/ws`);
-  console.log(`  Docs:     ${publicUrl}/docs\n`);
+    // Render expõe a URL pública do serviço em RENDER_EXTERNAL_URL — usamos
+    // isso no banner para não exibir "localhost" em produção.
+    const publicUrl = process.env.RENDER_EXTERNAL_URL ?? `http://localhost:${env.PORT}`;
+    const wsUrl = publicUrl.replace(/^http/, 'ws');
+
+    console.log('\n╔════════════════════════════════════════════╗');
+    console.log('║   ERP SaaS — Enterprise Premium (E15)     ║');
+    console.log('╚════════════════════════════════════════════╝');
+    console.log(`\n  Servidor: ${publicUrl}`);
+    console.log(`  Ambiente: ${env.NODE_ENV}`);
+    console.log(`  Health:   ${publicUrl}/health`);
+    console.log(`  API:      ${publicUrl}/api/v1`);
+    console.log(`  WebSocket: ${wsUrl}/ws`);
+    console.log(`  Docs:     ${publicUrl}/docs\n`);
+  });
+}
+
+startServer().catch((error) => {
+  logger.error('Falha ao inicializar o backend:', error);
+  process.exit(1);
 });
 
 export default app;
