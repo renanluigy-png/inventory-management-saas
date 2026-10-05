@@ -3,17 +3,11 @@ import app from './app';
 import { env } from './config/env';
 import { logger } from './utils/logger';
 import { initSocketIO } from './websocket/socket';
-import { ensureDemoAccount } from './services/DemoAccountService';
 
 const httpServer = createServer(app);
 initSocketIO(httpServer);
 
-async function startServer() {
-  // A conta demo faz parte do contrato do ambiente público. O bootstrap é
-  // idempotente e nunca remove dados existentes.
-  await ensureDemoAccount();
-  logger.info('Conta de demonstração verificada com sucesso.');
-
+function startServer() {
   httpServer.listen(env.PORT, () => {
     logger.info(`Servidor iniciado na porta ${env.PORT} [${env.NODE_ENV}]`);
 
@@ -34,9 +28,6 @@ async function startServer() {
   });
 }
 
-startServer().catch((error) => {
-  logger.error('Falha ao inicializar o backend:', error);
-  process.exit(1);
-});
+startServer();
 
 export default app;
