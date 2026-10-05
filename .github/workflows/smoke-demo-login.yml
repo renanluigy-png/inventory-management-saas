@@ -1,0 +1,43 @@
+name: Smoke Test - Demo Login
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  demo-login:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Aguardar API e testar login da demonstração
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          API="https://inventory-management-saas-1.onrender.com"
+
+          for attempt in {1..8}; do
+            echo "Tentativa $attempt/8..."
+
+            health_code="$(curl -sS -o /tmp/health.json -w '%{http_code}' --max-time 45 "$API/health" || true)"
+
+            if [ "$health_code" = "200" ]; then
+              login_body="$(curl -sS --max-time 45                 -H 'Content-Type: application/json'                 -d '{"email":"admin@demo.com","senha":"123456"}'                 "$API/api/v1/auth/login")"
+
+              if printf '%s' "$login_body" | jq -e '.data.accessToken | type == "string" and length > 20' >/dev/null 2>&1; then
+                echo "Demo login OK."
+                exit 0
+              fi
+
+              echo "API respondeu, mas o login ainda não está pronto."
+            else
+              echo "Health HTTP $health_code."
+            fi
+
+            sleep 20
+          done
+
+          echo "Smoke test falhou: a conta de demonstração não conseguiu autenticar."
+          exit 1
