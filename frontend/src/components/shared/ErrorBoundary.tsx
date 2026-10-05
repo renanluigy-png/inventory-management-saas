@@ -11,6 +11,15 @@ interface State {
   error: Error | null
 }
 
+const CHUNK_RELOAD_KEY = 'cde-chunk-reload-attempt'
+
+function isChunkLoadError(error: Error | null): boolean {
+  const message = error?.message ?? ''
+  return /failed to fetch dynamically imported module|importing a module script failed|loading chunk [\w-]+ failed|chunkloaderror/i.test(
+    message
+  )
+}
+
 export class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false, error: null }
 
@@ -20,10 +29,41 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: { componentStack: string }) {
     console.error('[ErrorBoundary]', error.message, info.componentStack)
+
+    // GitHub Pages pode manter o HTML anterior em cache enquanto a nova
+    // publicação já disponibilizou hashes de chunks diferentes. Nesse caso,
+    // uma única recarga limpa o descompasso sem entrar em loop infinito.
+    if (isChunkLoadError(error)) {
+      try {
+        const attemptedAt = Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) ?? '0')
+        const recentlyRetried = Date.now() - attemptedAt < 30_000
+
+        if (!recentlyRetried) {
+          sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()))
+          window.location.reload()
+        }
+      } catch {
+        // sessionStorage pode estar indisponível em navegação privada/bloqueada.
+      }
+    }
+  }
+
+  componentDidMount() {
+    // Após uma montagem bem-sucedida, qualquer tentativa anterior de recovery
+    // deixa de ser relevante.
+    try {
+      sessionStorage.removeItem(CHUNK_RELOAD_KEY)
+    } catch {
+      // noop
+    }
   }
 
   private handleReset = () => {
     this.setState({ hasError: false, error: null })
+  }
+
+  private handleHome = () => {
+    window.location.replace(import.meta.env.BASE_URL)
   }
 
   render() {
@@ -60,8 +100,8 @@ export class ErrorBoundary extends Component<Props, State> {
                 Tentar novamente
               </button>
               <button
-                onClick={() => window.location.replace('/')}
-                className="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm font-medium transition-colors"
+                onClick={this.handleHome}
+                className="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm font-medium"
               >
                 Voltar ao início
               </button>
