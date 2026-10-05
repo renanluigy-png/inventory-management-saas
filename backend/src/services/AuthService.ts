@@ -7,6 +7,9 @@ import { env } from '../config/env';
 import { JwtPayload, LoginCredentials } from '../types/auth.types';
 import { prisma } from '../config/database';
 import { sendPasswordResetEmail } from '../utils/email';
+import { ensureDemoAccount } from './DemoAccountService';
+
+const DEMO_EMAIL = 'admin@demo.com';
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 15;
@@ -54,8 +57,21 @@ export class AuthService {
     meta: { ip?: string; userAgent?: string } = {}
   ) {
     const { email, senha } = credentials;
+    const normalizedEmail = email.trim().toLowerCase();
+    let user = await this.userRepository.findByEmail(normalizedEmail);
 
-    const user = await this.userRepository.findByEmail(email);
+    // A conta pública é parte do contrato da demonstração. Caso tenha sido
+    // removida, desativada ou bloqueada, restaura somente a conta demo antes
+    // de autenticar. O restante dos usuários segue o fluxo normal.
+    if (
+      normalizedEmail === DEMO_EMAIL &&
+      (!user ||
+        !user.ativo ||
+        (user.bloqueadoAte && user.bloqueadoAte > new Date()))
+    ) {
+      await ensureDemoAccount();
+      user = await this.userRepository.findByEmail(normalizedEmail);
+    }
 
     if (!user) {
       throw new AppError('E-mail ou senha incorretos.', 401);
@@ -76,7 +92,20 @@ export class AuthService {
       );
     }
 
-    const senhaCorreta = await bcrypt.compare(senha, user.senha);
+    let senhaCorreta = await bcrypt.compare(senha, user.senha);
+
+    // Uma conta demo é pública e pode ser alterada por testes anteriores.
+    // Repara a conta uma vez quando a credencial esperada não confere.
+    if (!senhaCorreta && normalizedEmail === DEMO_EMAIL && senha === '123456') {
+      await ensureDemoAccount();
+      user = await this.userRepository.findByEmail(normalizedEmail);
+
+      if (!user || !user.ativo) {
+        throw new AppError('Conta de demonstração indisponível.', 503);
+      }
+
+      senhaCorreta = await bcrypt.compare(senha, user.senha);
+    }
 
     if (!senhaCorreta) {
       const novasAttempts = user.loginAttempts + 1;
