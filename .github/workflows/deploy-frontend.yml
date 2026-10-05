@@ -1,11 +1,12 @@
 name: Deploy Frontend (GitHub Pages)
 
 on:
+  # GitHub Pages do repositório também pode disparar a publicação automática
+  # baseada na branch. Executamos este deploy em qualquer push para main para
+  # garantir que essa publicação automática nunca deixe o site preso no README
+  # em vez do frontend React.
   push:
     branches: [main]
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/deploy-frontend.yml'
   workflow_dispatch:
 
 permissions:
@@ -41,8 +42,7 @@ jobs:
       - name: Build de produção
         run: npm run build
         env:
-          # Só este workflow define VITE_BASE_PATH — o build Docker/nginx
-          # (ci.yml) não define, e continua servindo a partir da raiz "/".
+          # GitHub Pages (site de projeto) publica em /<repositório>/.
           VITE_BASE_PATH: /inventory-management-saas/
 
       - name: Configurar GitHub Pages
