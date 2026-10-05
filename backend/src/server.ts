@@ -9,16 +9,24 @@ import { ensureDemoAccount } from './services/DemoAccountService';
 const httpServer = createServer(app);
 initSocketIO(httpServer);
 
-async function prepareDatabase(): Promise<void> {
-  logger.info('Preparando banco de dados: executando migrations...');
-
+function runPrismaCommand(args: string[]): void {
   const npxCommand = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-  execFileSync(npxCommand, ['prisma', 'migrate', 'deploy'], {
+
+  execFileSync(npxCommand, ['prisma', ...args], {
     stdio: 'inherit',
     env: process.env,
   });
+}
 
-  logger.info('Migrations aplicadas com sucesso.');
+async function prepareDatabase(): Promise<void> {
+  logger.info('Preparando banco de dados...');
+
+  // Mantém o histórico de migrations atualizado quando existir uma migration
+  // pendente e, em seguida, reconcilia o banco com o schema Prisma atual.
+  runPrismaCommand(['migrate', 'deploy']);
+  runPrismaCommand(['db', 'push', '--skip-generate', '--accept-data-loss']);
+
+  logger.info('Schema Prisma aplicado com sucesso.');
 
   // Mantém a conta pública de demonstração disponível após cada deploy.
   await ensureDemoAccount();
@@ -32,8 +40,6 @@ async function startServer() {
     httpServer.listen(env.PORT, () => {
       logger.info(`Servidor iniciado na porta ${env.PORT} [${env.NODE_ENV}]`);
 
-      // Render expõe a URL pública do serviço em RENDER_EXTERNAL_URL — usamos
-      // isso no banner para não exibir "localhost" em produção.
       const publicUrl = process.env.RENDER_EXTERNAL_URL ?? `http://localhost:${env.PORT}`;
       const wsUrl = publicUrl.replace(/^http/, 'ws');
 
