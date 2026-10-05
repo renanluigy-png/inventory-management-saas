@@ -1,8 +1,11 @@
 name: CI
 
 on:
+  # A validação completa roda em PRs e em develop. O main fica responsável
+  # pela publicação do frontend no GitHub Pages, evitando duas filas pesadas
+  # competindo a cada commit de produção.
   push:
-    branches: [main, develop]
+    branches: [develop]
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
