@@ -7,6 +7,12 @@ export interface ServerStats {
   cpuUsage: number;
   nodeVersion: string;
   timestamp: string;
+
+  // Aliases legados mantidos por compatibilidade com clientes publicados anteriormente.
+  memoria: { usadaMB: number; totalMB: number };
+  cpu: { usoPct: number };
+  versaoNode: string;
+  plataforma: string;
 }
 
 export interface PlatformStats {
@@ -33,7 +39,11 @@ export class MonitorService {
 
   getOnlineUsers() {
     this.purgeStale();
-    return Array.from(onlineUsers.entries()).map(([id, data]) => ({ id, ...data }));
+    return Array.from(onlineUsers.entries()).map(([id, data]) => ({
+      id,
+      userId: id,
+      ...data,
+    }));
   }
 
   private purgeStale(): void {
@@ -72,16 +82,33 @@ export class MonitorService {
     const totalMb = Number((process.memoryUsage.rss() / 1024 / 1024).toFixed(1));
     const usedMb = Number((mem.heapUsed / 1024 / 1024).toFixed(1));
 
+    const memoryPercent = totalMb > 0 ? Math.round((usedMb / totalMb) * 100) : 0;
+    const cpuUsage = 0; // real CPU requires os.cpus() differential — simplified here
+    const uptime = Math.floor(process.uptime());
+    const nodeVersion = process.version;
+    const plataforma = process.platform;
+
     return {
-      uptime: Math.floor(process.uptime()),
+      uptime,
       memoryMb: {
         used: usedMb,
         total: totalMb,
-        percent: totalMb > 0 ? Math.round((usedMb / totalMb) * 100) : 0,
+        percent: memoryPercent,
       },
-      cpuUsage: 0, // real CPU requires os.cpus() differential — simplified here
-      nodeVersion: process.version,
+      cpuUsage,
+      nodeVersion,
       timestamp: new Date().toISOString(),
+
+      // Compatibilidade com o frontend antigo.
+      memoria: {
+        usadaMB: usedMb,
+        totalMB: totalMb,
+      },
+      cpu: {
+        usoPct: cpuUsage,
+      },
+      versaoNode: nodeVersion,
+      plataforma,
     };
   }
 
