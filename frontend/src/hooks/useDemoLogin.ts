@@ -3,9 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { login } from '../api/auth'
 import { useAuthStore } from '../store/auth.store'
+import {
+  DEMO_EMAIL,
+  DEMO_SENHA,
+  getDemoTrial,
+  isDemoTrialExpired,
+  startDemoTrial,
+} from '../utils/demoTrial'
 
-export const DEMO_EMAIL = 'admin@demo.com'
-export const DEMO_SENHA = '123456'
+export { DEMO_EMAIL, DEMO_SENHA }
 
 /**
  * Login automático com a conta de demonstração — usado tanto na Landing Page
@@ -17,6 +23,14 @@ export function useDemoLogin() {
   const setAuth = useAuthStore((s) => s.setAuth)
 
   async function enterDemo() {
+    // O relógio começa no clique e nunca é reiniciado por logout, refresh ou
+    // fechamento do navegador.
+    if (isDemoTrialExpired()) {
+      toast.error('Sua demonstração de 7 dias já terminou.')
+      return
+    }
+
+    startDemoTrial()
     setLoading(true)
     try {
       // A primeira chamada acorda o serviço do Render. O health pode retornar
