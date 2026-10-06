@@ -15,7 +15,7 @@ export function DemoSection() {
 
           <h2 className="text-2xl font-bold text-white sm:text-3xl">🚀 Teste a Demonstração</h2>
           <p className="mx-auto mt-3 max-w-lg text-indigo-100">
-            Experimente gratuitamente todas as funcionalidades do sistema sem criar uma conta.
+            Experimente todas as funcionalidades do sistema por 7 dias, sem criar uma conta.
           </p>
 
           <div className="mx-auto mt-8 grid max-w-md grid-cols-1 gap-5 rounded-2xl bg-white/10 p-6 shadow-inner backdrop-blur-sm sm:grid-cols-2 sm:gap-4">
