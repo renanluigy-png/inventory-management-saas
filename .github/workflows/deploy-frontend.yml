@@ -45,6 +45,9 @@ jobs:
           # GitHub Pages (site de projeto) publica em /<repositório>/.
           VITE_BASE_PATH: /inventory-management-saas/
 
+      - name: Configurar fallback para SPA
+        run: cp dist/index.html dist/404.html
+
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
 
