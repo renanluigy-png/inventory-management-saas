@@ -11,6 +11,7 @@ import { useAuthStore } from '../../store/auth.store'
 import { useDemoLogin, DEMO_EMAIL, DEMO_SENHA } from '../../hooks/useDemoLogin'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
+import { DEMO_EMAIL, isDemoTrialExpired, startDemoTrial } from '../../utils/demoTrial'
 
 const schema = z.object({
   email: z.string().email('Email inválido'),
@@ -36,6 +37,16 @@ export default function Login() {
 
   async function onSubmit(data: FormData) {
     try {
+      const normalizedEmail = data.email.trim().toLowerCase()
+
+      if (normalizedEmail === DEMO_EMAIL) {
+        if (isDemoTrialExpired()) {
+          toast.error('Sua demonstração de 7 dias já terminou.')
+          return
+        }
+        startDemoTrial()
+      }
+
       const result = await login(data.email, data.senha)
       setAuth(result.accessToken, result.user, result.refreshToken)
       toast.success(`Bem-vindo, ${result.user.nome}!`)
