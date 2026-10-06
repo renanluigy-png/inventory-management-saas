@@ -10,11 +10,16 @@ export interface OnlineUser {
 }
 
 export interface ServerStats {
-  uptime: string;
-  versaoNode: string;
-  plataforma: string;
-  cpu: { usoPct: number };
-  memoria: { usadaMB: number; totalMB: number };
+  uptime: number;
+  memoryMb: { used: number; total: number; percent: number };
+  cpuUsage: number;
+  nodeVersion: string;
+  timestamp: string;
+  // Campos opcionais de versões anteriores da API.
+  memoria?: { usadaMB: number; totalMB: number };
+  cpu?: { usoPct: number };
+  versaoNode?: string;
+  plataforma?: string;
   disco?: { usadoGB: number; totalGB: number };
   conexoes?: Record<string, number | string>;
   db?: { online: boolean; latenciams?: number };
@@ -42,7 +47,10 @@ export const getServerStats = async () => {
 export const getOnlineUsers = async () => {
   const { data } = await api.get('/api/v1/monitor/online-users');
   const users = data.data?.users ?? data.data ?? [];
-  return users as OnlineUser[];
+  return (users as Array<OnlineUser & { id?: string }>).map((user) => ({
+    ...user,
+    userId: user.userId ?? user.id ?? '',
+  }));
 };
 
 export const getPlatformStats = async () => {
