@@ -11,7 +11,7 @@ import { useAuthStore } from '../../store/auth.store'
 import { useDemoLogin } from '../../hooks/useDemoLogin'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
-import { DEMO_EMAIL, isDemoTrialExpired, startDemoTrial } from '../../utils/demoTrial'
+import { DEMO_EMAIL, DEMO_SENHA, isDemoTrialExpired, startDemoTrial } from '../../utils/demoTrial'
 
 const schema = z.object({
   email: z.string().email('Email inválido'),
