@@ -16,6 +16,8 @@ import { NotificationBell } from '../components/shared/NotificationBell'
 import { GlobalSearch } from '../components/shared/GlobalSearch'
 import { ChatBot } from '../components/ai/ChatBot'
 import { OnboardingWizard, shouldShowOnboarding } from '../components/shared/OnboardingWizard'
+import { DemoTrialBanner } from '../components/shared/DemoTrialBanner'
+import { DEMO_EMAIL, getDemoTrial, isDemoTrialExpired } from '../utils/demoTrial'
 
 interface NavItem {
   icon: React.ElementType
@@ -114,6 +116,13 @@ export default function DashboardLayout() {
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(() => shouldShowOnboarding())
+  const isDemoUser = user?.email?.trim().toLowerCase() === DEMO_EMAIL
+
+  const handleDemoExpired = useCallback(() => {
+    if (!isDemoUser || !isDemoTrialExpired()) return
+    logout()
+    navigate('/login', { replace: true, state: { demoExpired: true } })
+  }, [isDemoUser, logout, navigate])
 
   // Close mobile sidebar on route change
   useEffect(() => { setMobileOpen(false) }, [location.pathname])
@@ -256,7 +265,12 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-          {/* Banner de impersonação */}
+          {/* Demonstração — contador persistente de 7 dias */}
+        {isDemoUser && getDemoTrial() && (
+          <DemoTrialBanner onExpired={handleDemoExpired} />
+        )}
+
+        {/* Banner de impersonação */}
         <ImpersonationBanner />
 
         {/* Page content */}
