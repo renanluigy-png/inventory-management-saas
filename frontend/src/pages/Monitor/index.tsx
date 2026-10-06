@@ -76,7 +76,19 @@ export default function Monitor() {
     refetchInterval: 15_000,
   })
 
-  const memPercent = server ? (server.memoria.usadaMB / server.memoria.totalMB) * 100 : 0
+  const memory = server?.memoryMb
+  const memPercent = memory?.percent ?? (memory?.total ? (memory.used / memory.total) * 100 : 0)
+
+  const formatUptime = (seconds: number) => {
+    const totalSeconds = Math.max(0, Math.floor(seconds || 0))
+    const days = Math.floor(totalSeconds / 86400)
+    const hours = Math.floor((totalSeconds % 86400) / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+
+    if (days > 0) return `${days}d ${hours}h ${minutes}min`
+    if (hours > 0) return `${hours}h ${minutes}min`
+    return `${minutes}min`
+  }
 
   return (
     <div className="space-y-6" role="main" aria-label="Monitor em Tempo Real">
@@ -121,13 +133,13 @@ export default function Monitor() {
                 <Cpu className="h-4 w-4 text-indigo-500" aria-hidden="true" />
                 Recursos do Servidor
               </h2>
-              <GaugeBar label="CPU" value={server.cpu.usoPct} max={100} color="bg-indigo-500" />
-              <GaugeBar label={`Memória (${server.memoria.usadaMB.toFixed(0)} MB / ${server.memoria.totalMB.toFixed(0)} MB)`} value={memPercent} max={100} color="bg-blue-500" />
+              <GaugeBar label="CPU" value={server.cpuUsage ?? 0} max={100} color="bg-indigo-500" />
+              <GaugeBar label={`Memória (${memory?.used?.toFixed(0) ?? '0'} MB / ${memory?.total?.toFixed(0) ?? '0'} MB)`} value={memPercent} max={100} color="bg-blue-500" />
               {server.disco && <GaugeBar label={`Disco (${server.disco.usadoGB?.toFixed(1)} GB / ${server.disco.totalGB?.toFixed(1)} GB)`} value={server.disco.usadoGB ?? 0} max={server.disco.totalGB ?? 1} color="bg-green-500" />}
               <div className="pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-xs text-gray-400">
-                <span>Uptime: {server.uptime}</span>
-                <span>Node: {server.versaoNode}</span>
-                <span>Plataforma: {server.plataforma}</span>
+                <span>Uptime: {formatUptime(server.uptime)}</span>
+                <span>Node: {server.nodeVersion}</span>
+                <span>Plataforma: {navigator.platform || '—'}</span>
               </div>
             </div>
 
